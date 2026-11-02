@@ -1,14 +1,14 @@
 import Foundation
 
 enum ReadingStatus: CaseIterable {
-    case wantToRead
     case reading
+    case wantToRead
     case finished
 
     var title: String {
         switch self {
-        case .wantToRead: "To read"
         case .reading: "Currently reading"
+        case .wantToRead: "To read"
         case .finished: "Finished"
         }
     }
