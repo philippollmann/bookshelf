@@ -1,11 +1,11 @@
 # Live demo 1: modeling the shelf (tag `s1-1-model`)
 
-**Session 1, after the Swift basics slides. About 25-30 min.**
+**Session 1, after the Swift basics slides. About 25 min.**
 Starts at `s1-0-start` (empty template). Ends at `s1-1-model`.
 
-Goal: almost all the time goes into the **model**. The UI is only there to see that the model works: a list with progress bars, an Add button and a "Read 10 pages" button. Text input, the card and the grid come in demo 2.
+Goal: almost all the time goes into the **model**: a book, its reading status and its progress. The UI is only there to see the books: one line per book (title, author, percent) and an Add button. `read(pages:)` is shown in the temporary preview in step 4; in the UI it comes with the "+10" button in demo 2, together with text input, the book card and the grid. Rating and notes come later, with the detail screen.
 
-Each step maps to one Swift basics slide. Type it, run or preview it, say the one sentence, move on. The full end state is at the bottom, to copy in if you get stuck.
+Each step maps to one Swift basics slide. Type it, run or preview it, say the one sentence, move on. The full end state is the `s1-1-model` tag.
 
 ---
 
@@ -54,18 +54,7 @@ struct Book {
 
 > Say: `id` is `let` because it never changes; everything else can change. Type inference: `currentPage = 0` is an `Int`, no annotation needed. The defaults mean you only pass what matters: `Book(title:author:pages:)`, the memberwise initializer is free.
 
-## Step 3: optionals (slide: Optionals) ~4 min
-
-```swift
-    var rating: Int?          // 1...5, nil = not rated yet
-    var notes: [String] = []
-```
-
-> Say: "not rated yet" is a real state, so `nil` is honest. A rating of `0` would be a lie (and someone would compute an average with it).
-
-(`summary` in step 6 shows `if let`.)
-
-## Step 4: computed property for progress (slides: struct, properties) ~3 min
+## Step 3: progress as a computed property (slide: struct, properties) ~4 min
 
 ```swift
     var progress: Double {
@@ -76,7 +65,7 @@ struct Book {
 
 > Say: progress is **computed, not stored**. If we stored it, it could disagree with `currentPage`. `guard` = early exit, here against dividing by zero. Note the explicit `Double(...)`: Swift never converts number types silently.
 
-## Step 5: a mutating method, value semantics (slide: struct vs class) ~5 min
+## Step 4: a mutating method, value semantics (slide: struct vs class) ~6 min
 
 ```swift
     mutating func read(pages count: Int) {
@@ -92,7 +81,7 @@ struct Book {
 
 > Say: the rules live in one place: the page is clamped to `0...pages`, and the last page makes the book finished. `mutating` because a struct method that changes the struct has to say so. Argument labels: `read(pages: 10)` reads like English; `count` is the name inside.
 
-**Value semantics live** (optional, 1 min). Show it in `#Preview` or a temporary `let _ =` and delete it afterwards. Don't commit it:
+**Value semantics live** (optional, 1 min). Show it in a temporary `#Preview` or `let _ =` and delete it afterwards. Don't commit it:
 
 ```swift
 var hobbit = Book(title: "The Hobbit", author: "J.R.R. Tolkien", pages: 320)
@@ -101,9 +90,11 @@ copy.read(pages: 50)
 print(hobbit.currentPage, copy.currentPage) // 0 50, a copy, not a shared object
 ```
 
-> Say: with a class, both would print 50. This is why SwiftUI loves structs. (Session 2: SwiftData needs a class, and we'll talk about why.)
+> Say: with a class, both would print 50. This is why SwiftUI loves structs.
 
-## Step 6: protocols and extensions (slide: Protocols and extensions) ~4 min
+**Optionals slide:** the model has no optional yet, on purpose. The first real one is the rating ("not rated yet" = `nil`) when we build the detail screen. If you want one now, show it in the same temporary preview: `Book.samples.first(where: { $0.status == .reading })` returns a `Book?`, then unwrap it with `if let`.
+
+## Step 5: protocols and extensions (slide: Protocols and extensions) ~3 min
 
 Make it `Identifiable` (SwiftUI's `List` and `ForEach` need it, and we already have `id`):
 
@@ -111,21 +102,7 @@ Make it `Identifiable` (SwiftUI's `List` and `ForEach` need it, and we already h
 struct Book: Identifiable {
 ```
 
-Add behaviour in an **extension**, plus `if let` for the optional:
-
-```swift
-extension Book {
-    var summary: String {
-        if let rating {
-            "\(title) by \(author), \(rating) of 5"
-        } else {
-            "\(title) by \(author), not rated yet"
-        }
-    }
-}
-```
-
-Sample data (same books as the Figma design, so screen 1 percentages match: Hobbit 8 %, Onyx Storm 34 %):
+Sample data in an **extension** (same books as the Figma design, so the percentages match screen 1: Hobbit 8 %, Onyx Storm 34 %):
 
 ```swift
 extension Book {
@@ -134,15 +111,17 @@ extension Book {
         Book(title: "Onyx Storm", author: "Rebecca Yarros", pages: 544, currentPage: 185, status: .reading),
         Book(title: "Solaris", author: "Stanisław Lem", pages: 204),
         Book(title: "A Little Life", author: "Hanya Yanagihara", pages: 720),
-        Book(title: "Dune", author: "Frank Herbert", pages: 412, currentPage: 412, status: .finished, rating: 5),
-        Book(title: "Project Hail Mary", author: "Andy Weir", pages: 476, currentPage: 476, status: .finished, rating: 4),
+        Book(title: "Dune", author: "Frank Herbert", pages: 412, currentPage: 412, status: .finished),
+        Book(title: "Project Hail Mary", author: "Andy Weir", pages: 476, currentPage: 476, status: .finished),
     ]
 }
 ```
 
-> Tip: paste the samples rather than typing them. Nobody learns anything from watching you type six titles.
+> Say: an extension adds things to a type without touching its definition; here it keeps the test data away from the model. `static` = belongs to the type, not to one book.
+>
+> Tip: paste the samples rather than typing them.
 
-## Step 7: just enough UI to see it (teaser for part 2) ~5 min
+## Step 6: just enough UI to see it (teaser for part 2) ~4 min
 
 Replace `ContentView.swift`:
 
@@ -154,34 +133,24 @@ struct ContentView: View {
 
     var body: some View {
         NavigationStack {
-            List {
-                ForEach($books) { $book in
-                    VStack(alignment: .leading, spacing: 8) {
-                        Text(book.title)
-                            .font(.headline)
-                        Text(book.summary)
-                            .font(.subheadline)
-                            .foregroundStyle(.secondary)
-
-                        ProgressView(value: book.progress)
-                            .tint(.orange)
-
+            ScrollView {
+                VStack(alignment: .leading, spacing: 16) {
+                    ForEach(books) { book in
                         HStack {
-                            Text(book.status.title)
-                            Spacer()
-                            Text(book.progress, format: .percent.precision(.fractionLength(0)))
-                                .monospacedDigit()
-                        }
-                        .font(.caption)
+                            VStack(alignment: .leading) {
+                                Text(book.title)
+                                    .font(.headline)
+                                Text(book.author)
+                                    .foregroundStyle(.secondary)
+                            }
 
-                        Button("Read 10 pages") {
-                            book.read(pages: 10)
+                            Spacer()
+
+                            Text(book.progress, format: .percent.precision(.fractionLength(0)))
                         }
-                        .buttonStyle(.bordered)
-                        .disabled(book.status == .finished)
                     }
-                    .padding(.vertical, 4)
                 }
+                .padding()
             }
             .navigationTitle("Library")
             .toolbar {
@@ -198,26 +167,16 @@ struct ContentView: View {
 }
 ```
 
-> Say: don't worry about `@State` and the `$` yet; that is exactly part 2. What matters now: tap "Read 10 pages" on The Hobbit, watch the bar and the percentage move, keep tapping on "New book 7" and watch the status go *To read → Currently reading → Finished*. **The UI has no logic; all the rules are in the model.**
+> Say: don't worry about `@State` yet; that is exactly part 2. What matters now: the list shows our model, the percentages come from the computed `progress`, and tapping + adds a book that starts at 0 % with the defaults from step 2.
 
-`.buttonStyle(.bordered)` is not decoration: without it, a button inside a List row makes the whole row tappable.
+Why `ScrollView` and not `List`: `List` gives you swipe to delete, separators and the grouped iOS look for free, but it is hard to style. Our design is cards and a cover grid (demo 2), so a `ScrollView` with a `VStack` is the better fit.
 
 ## Wrap-up (1 min)
-
-Commit, tag, push:
-
-```bash
-git add Bookshelf
-git commit -m "Live demo 1: Book model with progress and reading status"
-git tag s1-1-model
-git push origin main --tags
-```
 
 Bridge to part 2: "Right now, every new book is called *New book 7*. Next: a real form to type a book in, sections by status, and a proper book card."
 
 ## Questions students usually ask
 
-- *Why not `class Book`?* Value semantics (step 5). Session 2 comes back to it with SwiftData.
-- *Why `Int?` and not `Int = 0`?* Step 3.
-- *Why is `progress` not a `var` we set?* Step 4: derived data is never stored twice.
+- *Why not `class Book`?* Value semantics (step 4).
+- *Why is `progress` not a `var` we set?* Step 3: derived data is never stored twice.
 - *A book with 0 pages?* `progress` guards against it. Proper validation comes with the form in demo 2.

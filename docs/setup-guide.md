@@ -15,7 +15,7 @@ Xcode 27, File > New > Project > iOS > App.
 | Storage | None (SwiftData is added by hand in session 2) |
 | Location | this repo folder (`bookshelf/`). **Uncheck** "Create Git repository on my Mac" (the repo already exists). |
 
-Xcode creates `bookshelf/Bookshelf/Bookshelf.xcodeproj` and `bookshelf/Bookshelf/Bookshelf/`. That nesting is fine.
+Xcode creates `bookshelf/bookshelf/bookshelf.xcodeproj` and the source folder `bookshelf/bookshelf/bookshelf/` (synchronized folder: new files in it show up in Xcode automatically). The app entry point is `MyApp.swift`.
 
 Then in the target's **Build Settings**:
 
@@ -64,8 +64,8 @@ Session length is about 3 h. The Bookshelf demos get roughly 60-80 min per sessi
 
 | Tag | Session | Live demo | Bookshelf afterwards | Status |
 | --- | --- | --- | --- | --- |
-| `s1-0-start` | 1 | none (empty Xcode template) | Hello World runs | waiting for the Xcode project |
-| `s1-1-model` | 1 | Demo 1: Swift basics, modeling the shelf | `Book` + `ReadingStatus`, sample data, a list with progress bars, Add button, "Read 10 pages" | code ready, see `live-coding/s1-1-model.md` |
+| `s1-0-start` | 1 | none (empty Xcode template) | Hello World runs | done |
+| `s1-1-model` | 1 | Demo 1: Swift basics, modeling the shelf | `Book` + `ReadingStatus`, sample data, a list with progress bars, Add button, "Read 10 pages" | done, script in `live-coding/s1-1-model.md` |
 | `s1-2-shelf` | 1 | Demo 2: SwiftUI + layout | Text input for new books (`@State`, bindings), sections by status, `BookCard` with cover placeholder, 2-column grid, files split into Models/Views | to do |
 | `s2-1-...` | 2 | MVVM: `@Observable` view model + repository | | to do, details still open |
 | `s2-2-...` | 2 | Screens: detail view, Add Book + Update progress sheets | | to do |
