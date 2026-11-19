@@ -49,10 +49,13 @@ struct Book {
     var pages: Int
     var currentPage = 0
     var status = ReadingStatus.wantToRead
+    var coverURL: URL?
 }
 ```
 
 > Say: `id` is `let` because it never changes; everything else can change. Type inference: `currentPage = 0` is an `Int`, no annotation needed. The defaults mean you only pass what matters: `Book(title:author:pages:)`, the memberwise initializer is free.
+>
+> `URL?` is our **first optional**: not every book has a cover yet, and `nil` means "no cover". A `var` optional is `nil` by default, so the initializer doesn't ask for it. Real covers come from Open Library in session 2. (Why `URL?` and not `Image?`: the model stays free of SwiftUI, and a URL can be saved and decoded later.)
 
 ## Step 3: progress as a computed property (slide: struct, properties) ~4 min
 
@@ -84,7 +87,7 @@ struct Book {
 **Value semantics live** (optional, 1 min). Show it in a temporary `#Preview` or `let _ =` and delete it afterwards. Don't commit it:
 
 ```swift
-var hobbit = Book(title: "The Hobbit", author: "J.R.R. Tolkien", pages: 320)
+let hobbit = Book(title: "The Hobbit", author: "J.R.R. Tolkien", pages: 320)
 var copy = hobbit
 copy.read(pages: 50)
 print(hobbit.currentPage, copy.currentPage) // 0 50, a copy, not a shared object
@@ -92,7 +95,7 @@ print(hobbit.currentPage, copy.currentPage) // 0 50, a copy, not a shared object
 
 > Say: with a class, both would print 50. This is why SwiftUI loves structs.
 
-**Optionals slide:** the model has no optional yet, on purpose. The first real one is the rating ("not rated yet" = `nil`) when we build the detail screen. If you want one now, show it in the same temporary preview: `Book.samples.first(where: { $0.status == .reading })` returns a `Book?`, then unwrap it with `if let`.
+**Optionals slide:** `coverURL` from step 2 is the first optional in the model. Show it in the same temporary preview: `Book.samples[0].coverURL` is `nil`, then unwrap it with `if let url = book.coverURL { print(url) } else { print("no cover") }`. A second one, the rating ("not rated yet" = `nil`), comes with the detail screen. In demo 2, `Int(pagesText)` is the next real optional.
 
 ## Step 5: protocols and extensions (slide: Protocols and extensions) ~3 min
 
@@ -110,16 +113,14 @@ extension Book {
         Book(title: "The Hobbit", author: "J.R.R. Tolkien", pages: 320, currentPage: 26, status: .reading),
         Book(title: "Onyx Storm", author: "Rebecca Yarros", pages: 544, currentPage: 185, status: .reading),
         Book(title: "Solaris", author: "Stanisław Lem", pages: 204),
-        Book(title: "A Little Life", author: "Hanya Yanagihara", pages: 720),
         Book(title: "Dune", author: "Frank Herbert", pages: 412, currentPage: 412, status: .finished),
-        Book(title: "Project Hail Mary", author: "Andy Weir", pages: 476, currentPage: 476, status: .finished),
     ]
 }
 ```
 
 > Say: an extension adds things to a type without touching its definition; here it keeps the test data away from the model. `static` = belongs to the type, not to one book.
 >
-> Tip: paste the samples rather than typing them.
+> Type all four books, one line each: two reading, one to read, one finished, so every section has a book later. Nothing is pasted, because the students can't paste what is on your screen.
 
 ## Step 6: just enough UI to see it (teaser for part 2) ~4 min
 

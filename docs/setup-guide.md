@@ -4,7 +4,7 @@ The in-class app for iOS Advanced. It is built **live** in front of the class, n
 
 ## 1. Create the Xcode project (once, by you)
 
-Xcode 27, File > New > Project > iOS > App.
+Xcode 26.6, File > New > Project > iOS > App.
 
 | Field | Value |
 | --- | --- |
